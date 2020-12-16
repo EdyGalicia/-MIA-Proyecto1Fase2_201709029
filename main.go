@@ -1,7 +1,7 @@
 package main
 
 import (
-	"MIA_FASE1_201709029/funcs"
+	"MIA_Fase2_201709029/funcs"
 	"bufio"
 	"fmt"
 	"os"
@@ -11,7 +11,7 @@ import (
 
 func main() {
 	//funcs.TamanioDelEBRbro()
-	//funcs.TipoDeInstruccion("exec -path->\"/home/edygalicia/Escritorio/entradita.arch\"")
+	funcs.TipoDeInstruccion("exec -path->\"/home/edygalicia/Documentos/pr.arch\"")
 	////funcs.TipoDeInstruccion("mkdisk -size->50 -fit->BF -unit->M -path->\"/home/e discos/Disco1p.dsk\"")
 	//funcs.TipoDeInstruccion("montar -size->5 -unit->M -path->\"/home/mis discos/Disco3.dsk\"")
 	//funcs.TipoDeInstruccion("rmdisk -path->\"/home/los discos/Disco3.dsk\"")

@@ -91,6 +91,10 @@ func TipoDeInstruccion(entrada string) {
 			fmt.Println("el REP")
 			EjecutarREP(param, descrip)
 		}
+	case "mkfs":
+		{
+			EjecutarMKFS(param, descrip)
+		}
 	default:
 		{
 			fmt.Println("El comando es incorrecto.")
