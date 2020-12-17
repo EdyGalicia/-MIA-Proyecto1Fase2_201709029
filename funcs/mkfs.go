@@ -54,7 +54,7 @@ type Inodo struct {
 	IMtime [16]byte
 	IBlock [15]int64
 	IType  [1]byte
-	IPerm  int64
+	IPerm  [9]byte
 }
 
 //BloqueDeCarpeta info
@@ -308,6 +308,83 @@ func darFormatoInicial(p Partition, ruta string) {
 	fmt.Println(spf.StartTablaDeBloques)
 	fmt.Println()
 	TamanioDelSB()
+
+	file.Seek(superBLoque.StartBMdeInodos, 0)
+	EscribirByteEnBitmap(file)
+
+	file.Seek(superBLoque.StartBMdeBloques, 0)
+	EscribirByteEnBitmap(file)
+
+	//creo el inodo raiz
+	inodo := Inodo{}
+	inodo.IUid = 1
+	inodo.IGid = 1
+	inodo.ISize = sizeInodo
+	inodo.IAtime = fecha //fecha en que se leyo sin modificarlo
+	inodo.ICtime = fecha //fecha creacion
+	inodo.IMtime = fecha //fecha modificacion
+	for i := 0; i < len(inodo.IBlock); i++ {
+		inodo.IBlock[i] = -1
+	}
+	inodo.IBlock[0] = 0 //el primero a puntada al bloqueCarpeta0
+	inodo.IType[0] = 0  //indico que es carpeta
+	for i := 0; i < len(inodo.IPerm); i++ {
+		inodo.IPerm[i] = 7
+	}
+	//lo escribo
+	file.Seek(superBLoque.StartTablaDeInodos, 0)
+	err = binary.Write(file, binary.LittleEndian, inodo)
+	if err != nil {
+		log.Fatalln(err)
+	} else {
+		fmt.Println("El inodoRaiz se ha creado y escrito")
+	}
+
+	LeerInodo(ruta, superBLoque.StartTablaDeInodos)
+
+	//creo el bloque carpeta
+	bloqueCarpeta := BloqueDeCarpeta{}
+
+	for i := 0; i < len(bloqueCarpeta.BContent); i++ {
+		bloqueCarpeta.BContent[i].Apuntador = -1
+	}
+
+	var nombre [12]byte
+	nombreString := "."
+	for i := 0; i < len(nombreString); i++ {
+		nombre[i] = nombreString[i]
+	}
+	bloqueCarpeta.BContent[0].Name = nombre
+	bloqueCarpeta.BContent[0].Apuntador = 0
+
+	var nombre2 [12]byte
+	nombreString2 := ".."
+	for i := 0; i < len(nombreString2); i++ {
+		nombre2[i] = nombreString2[i]
+	}
+	bloqueCarpeta.BContent[1].Name = nombre2
+	bloqueCarpeta.BContent[1].Apuntador = 0
+
+	//esta
+	var nombre23 [12]byte
+	nombreString23 := "users.txt"
+	for i := 0; i < len(nombreString23); i++ {
+		nombre23[i] = nombreString23[i]
+	}
+	bloqueCarpeta.BContent[2].Name = nombre23
+	bloqueCarpeta.BContent[2].Apuntador = 1
+	//sssssssssssssssssss
+	//lo escribo
+	file.Seek(superBLoque.StartTablaDeBloques, 0)
+	err = binary.Write(file, binary.LittleEndian, bloqueCarpeta)
+	if err != nil {
+		log.Fatalln(err)
+	} else {
+		fmt.Println("El bloqueCarpeta se ha creado y escrito")
+	}
+	leerBloqueDeCarpetas(ruta, superBLoque.StartTablaDeBloques)
+
+	Buscar(ruta, superBLoque.StartTablaDeInodos, "users.txt", superBLoque)
 }
 
 //LeerSuperBloque lee
@@ -327,4 +404,150 @@ func LeerSuperBloque(ruta string, seek int64) SuperBloque {
 	}
 
 	return SP
+}
+
+//EscribirByteEnBitmap escribe un byte en el bitmap
+func EscribirByteEnBitmap(file *os.File) { // recibe el tamanio del archivo
+	tamanio := 1
+	var a []byte
+	a = make([]byte, tamanio, tamanio)
+	for i := 0; i < tamanio; i++ {
+		a[i] = 1
+	}
+
+	_, err := file.Write(a)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+}
+
+func leerBytes(ruta string, tam int, seek int64) []byte {
+	var a []byte
+	aa := int(tam)
+	a = make([]byte, tam, tam)
+	for i := 0; i < aa; i++ {
+		a[i] = 0
+	}
+
+	f, err := os.Open(ruta)
+	defer f.Close()
+	if err != nil {
+		log.Fatalln(err)
+	} else {
+
+		f.Seek(seek, 0)
+
+		err = binary.Read(f, binary.LittleEndian, a)
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}
+	return a
+}
+
+//LeerInodo lee el inodo de la posicion que le mandemos
+func LeerInodo(ruta string, seek int64) {
+	fmt.Println(" LEYENDO INODO")
+	file, err := os.Open(ruta)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer file.Close()
+
+	file.Seek(seek, 0)
+
+	inodo := Inodo{}
+	err = binary.Read(file, binary.LittleEndian, &inodo)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	fmt.Println(inodo.IUid)
+	fmt.Println(inodo.IGid)
+	fmt.Println(inodo.ISize)
+	fecha := ""
+	for i := 0; i < len(inodo.IAtime); i++ {
+		fecha += string(inodo.IAtime[i])
+	}
+	fmt.Println(fecha)
+	fecha = ""
+	for i := 0; i < len(inodo.ICtime); i++ {
+		fecha += string(inodo.ICtime[i])
+	}
+	fmt.Println(fecha)
+	fecha = ""
+	for i := 0; i < len(inodo.IMtime); i++ {
+		fecha += string(inodo.IMtime[i])
+	}
+	fmt.Println(fecha)
+
+	for i := 0; i < len(inodo.IBlock); i++ {
+		fmt.Println(inodo.IBlock[i])
+	}
+	fmt.Println(inodo.IType[0])
+	perms := ""
+	for i := 0; i < len(inodo.IPerm); i++ {
+		fmt.Println(inodo.IPerm[i])
+	}
+	fmt.Println(perms)
+
+	//return inodo
+}
+
+func leerBloqueDeArchivos(ruta string, seek int64) BloqueDeArchivos {
+	fmt.Println(" LEYENDO BLOQUE DE ARCHIVOS ")
+
+	file, err := os.Open(ruta)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer file.Close()
+
+	file.Seek(seek, 0)
+	blArchivo := BloqueDeArchivos{}
+	err = binary.Read(file, binary.LittleEndian, &blArchivo)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	cadena := ""
+	for i := 0; i < len(blArchivo.Contenido); i++ {
+		if blArchivo.Contenido[i] != 0 {
+			cadena += string(blArchivo.Contenido[i])
+		}
+	}
+	fmt.Println(cadena)
+
+	return blArchivo
+}
+
+func leerBloqueDeCarpetas(ruta string, seek int64) BloqueDeCarpeta {
+	fmt.Println(" LEYENDO BLOQUE DE CARPETAS")
+
+	file, err := os.Open(ruta)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer file.Close()
+
+	file.Seek(seek, 0)
+	blCarpeta := BloqueDeCarpeta{}
+	err = binary.Read(file, binary.LittleEndian, &blCarpeta)
+	if err != nil {
+		log.Fatalln(err)
+	} else {
+		for i := 0; i < len(blCarpeta.BContent); i++ {
+			nomb := ""
+			for j := 0; j < len(blCarpeta.BContent[i].Name); j++ {
+				if blCarpeta.BContent[i].Name[j] != 0 {
+					nomb += string(blCarpeta.BContent[i].Name[j])
+				}
+			}
+			fmt.Print("nombre: " + nomb + " apuntador: ")
+			fmt.Println(blCarpeta.BContent[i].Apuntador)
+		}
+	}
+	return blCarpeta
 }
