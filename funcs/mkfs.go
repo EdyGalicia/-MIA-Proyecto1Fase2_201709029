@@ -366,13 +366,13 @@ func darFormatoInicial(p Partition, ruta string) {
 	bloqueCarpeta.BContent[1].Apuntador = 0
 
 	//esta
-	var nombre23 [12]byte
-	nombreString23 := "users.txt"
-	for i := 0; i < len(nombreString23); i++ {
-		nombre23[i] = nombreString23[i]
-	}
-	bloqueCarpeta.BContent[2].Name = nombre23
-	bloqueCarpeta.BContent[2].Apuntador = 1
+	//var nombre23 [12]byte
+	//nombreString23 := "users.txt"
+	//for i := 0; i < len(nombreString23); i++ {
+	//	nombre23[i] = nombreString23[i]
+	//}
+	//bloqueCarpeta.BContent[2].Name = nombre23
+	//bloqueCarpeta.BContent[2].Apuntador = 1
 	//sssssssssssssssssss
 	//lo escribo
 	file.Seek(superBLoque.StartTablaDeBloques, 0)
@@ -384,7 +384,7 @@ func darFormatoInicial(p Partition, ruta string) {
 	}
 	leerBloqueDeCarpetas(ruta, superBLoque.StartTablaDeBloques)
 
-	Buscar(ruta, superBLoque.StartTablaDeInodos, "users.txt", superBLoque)
+	//Buscar(ruta, superBLoque.StartTablaDeInodos, "usersZ.txt", superBLoque)
 }
 
 //LeerSuperBloque lee
@@ -550,4 +550,58 @@ func leerBloqueDeCarpetas(ruta string, seek int64) BloqueDeCarpeta {
 		}
 	}
 	return blCarpeta
+}
+
+//EscribirSuperBloque escribe el superbloque
+func EscribirSuperBloque(ruta string, p Partition, superBLoque SuperBloque) {
+	file, err := os.OpenFile(ruta, os.O_WRONLY, 0644)
+	if err != nil {
+		fmt.Println("Error al abrir el disco")
+	} else {
+		file.Seek(p.PartStart, 0)
+		err = binary.Write(file, binary.LittleEndian, superBLoque)
+		if err != nil {
+			log.Fatalln(err)
+		} else {
+			fmt.Println("El superbloque se ha creado y escrito")
+		}
+	}
+}
+
+//EscribirBloqueCarpeta escribe un bloque carpeta en el posicion que le mande
+func EscribirBloqueCarpeta(ruta string, seek int64, blCarpeta BloqueDeCarpeta) {
+	file, err := os.OpenFile(ruta, os.O_WRONLY, 0644)
+	defer file.Close()
+	if err != nil {
+		fmt.Println("Error al abrir el disco")
+	} else {
+		file.Seek(seek, 0)
+		err = binary.Write(file, binary.LittleEndian, blCarpeta)
+		if err != nil {
+			log.Fatalln(err)
+		} else {
+			fmt.Println("El bloqueCarpeta se ha creado y escrito")
+		}
+	}
+
+}
+
+//EscribirInodo escribe un inodo en la posicion que se le mande (posicion en el archivo)
+func EscribirInodo(ruta string, seek int64, inodo Inodo) {
+
+	file, err := os.OpenFile(ruta, os.O_WRONLY, 0644)
+	defer file.Close()
+	if err != nil {
+		fmt.Println("Error al abrir el disco")
+	} else {
+
+		file.Seek(seek, 0)
+		err = binary.Write(file, binary.LittleEndian, inodo)
+		if err != nil {
+			log.Fatalln(err)
+		} else {
+			fmt.Println("El inodo se ha creado y escrito")
+		}
+	}
+
 }
