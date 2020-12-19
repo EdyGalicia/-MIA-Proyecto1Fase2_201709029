@@ -228,7 +228,7 @@ func buscarEspacioLibreEnBloqueCarpeta(ruta string, posicionEstructura int64, sp
 	inodo := leerElInodo(ruta, posicionEstructuraArch)
 	//iasd := Inodo{}
 	if inodo.IType[0] == 0 {
-		for i := 0; i < len(inodo.IBlock); i++ {
+		for i := 14; i < len(inodo.IBlock); i++ {
 			if i >= 0 && i <= 12 { //busco en los directos
 				if inodo.IBlock[i] != -1 {
 
@@ -279,7 +279,237 @@ func buscarEspacioLibreEnBloqueCarpeta(ruta string, posicionEstructura int64, sp
 					bloqueCarpeta.BContent[0].Apuntador = int32(sp.PrimerInodoLibre)
 					seekBC := calcularPosicionDeBloqueEnElArchivo(sp.PrimerBloqueLibre, sp)
 					EscribirBloqueCarpeta(ruta, seekBC, bloqueCarpeta)
+					//actualizar los bitmap--------------------------------------------------
+					EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre)
+					//ahora actualizo el superBloque
+					sp.NumDeBloquesLibres--
+					sp.PrimerBloqueLibre++
+					EscribirSuperBloque(ruta, partition, sp) //-------------------------------
 
+					//
+					//ahora si va todo lo demas
+					//creo el nuevo inodo
+					nuevoInodoBloqueCarpeta(ruta, posicionEstructura, sp) // posicion estructura es el padre
+					//actualizar los bitmap----------------------------------------------
+					EscribirByteBM(ruta, sp.StartBMdeInodos+sp.PrimerInodoLibre)
+					EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre)
+					//ahora actualizo el superBloque
+					sp.NumDeInodosLibres--
+					sp.NumDeBloquesLibres--
+					sp.PrimerInodoLibre++
+					sp.PrimerBloqueLibre++
+					EscribirSuperBloque(ruta, partition, sp) //-----------------------------
+
+					fmt.Println("Se ha creado una nuevecita")
+					LeerInodo(ruta, sp.StartTablaDeInodos) // de aqui pabajo nel
+					fmt.Println("de bloques")
+					f := leerBytes(ruta, 5, sp.StartBMdeBloques)
+					for i := 0; i < 5; i++ {
+						if f[i] == 0 {
+							fmt.Print(0)
+						} else if f[i] == 1 {
+							fmt.Print(1)
+						}
+					}
+					fmt.Println("\nde de inodos")
+					ff := leerBytes(ruta, 5, sp.StartBMdeInodos)
+					for i := 0; i < 5; i++ {
+						if ff[i] == 0 {
+							fmt.Print(0)
+						} else if ff[i] == 1 {
+							fmt.Print(1)
+						}
+					}
+					fmt.Println()
+
+					vb := leerBloqueDeCarpetas(ruta, sp.StartTablaDeBloques)
+					if vb != bloqueCarpeta {
+
+					}
+					return
+				}
+			} else if i == 13 {
+				if inodo.IBlock[i] != -1 {
+					posSeek := calcularPosicionDeBloqueEnElArchivo(inodo.IBlock[i], sp)
+					bloqueDeApun := leerElBloqueDeApuntadores(ruta, posSeek)
+
+					for i := 0; i < len(bloqueDeApun.Apuntadores); i++ {
+
+						if bloqueDeApun.Apuntadores[i] != -1 {
+
+							posSeek := calcularPosicionDeBloqueEnElArchivo(int64(bloqueDeApun.Apuntadores[i]), sp)
+							blCarpeta := leerElBloqueCarpeta(ruta, posSeek)
+
+							//recorro el bloqueCarpeta
+							for j := 0; j < len(blCarpeta.BContent); j++ {
+
+								if blCarpeta.BContent[j].Apuntador == -1 {
+									//lleno celdas y sobrescribo
+									copy(blCarpeta.BContent[j].Name[:], nombre)
+									blCarpeta.BContent[j].Apuntador = int32(sp.PrimerInodoLibre) //lo tengo que mandar el crearPack
+									EscribirBloqueCarpeta(ruta, posSeek, blCarpeta)
+
+									//creo el nuevo inodo
+									nuevoInodoBloqueCarpeta(ruta, posicionEstructura, sp) // posicion estructura es el padre
+
+									//actualizar los bitmap----------------------------------------------
+									EscribirByteBM(ruta, sp.StartBMdeInodos+sp.PrimerInodoLibre)
+									EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre)
+
+									//ahora actualizo el superBloque
+									sp.NumDeInodosLibres--
+									sp.NumDeBloquesLibres--
+									sp.PrimerInodoLibre++
+									sp.PrimerBloqueLibre++
+									EscribirSuperBloque(ruta, partition, sp) //-----------------------------
+
+									fmt.Println("Se ha creado la carpeta en un indirecto con pero encintro bloque carpeta, osea  -1")
+									//777777777777777777777777777777777777777777777777777777777777777777777777777
+									fmt.Println("\nde bloques")
+									f := leerBytes(ruta, 5, sp.StartBMdeBloques)
+									for i := 0; i < 5; i++ {
+										if f[i] == 0 {
+											fmt.Print(0)
+										} else if f[i] == 1 {
+											fmt.Print(1)
+										}
+									}
+									fmt.Println("\nde de inodos")
+									ff := leerBytes(ruta, 5, sp.StartBMdeInodos)
+									for i := 0; i < 5; i++ {
+										if ff[i] == 0 {
+											fmt.Print(0)
+										} else if ff[i] == 1 {
+											fmt.Print(1)
+										}
+									}
+									fmt.Println()
+									LeerInodo(ruta, sp.StartTablaDeInodos) // de aqui pabajo nel
+									fmt.Println("Bloque carpeta 3")
+									vb := leerBloqueDeCarpetas(ruta, calcularPosicionDeBloqueEnElArchivo(2, sp))
+									if vb != vb {
+
+									}
+									fmt.Println("Bloque de apuntadores")
+									bl := BloqueDeApuntadores{}
+									fa := leerElBloqueDeApuntadores(ruta, calcularPosicionDeBloqueEnElArchivo(1, sp))
+									if bl == fa {
+
+									}
+									//777777777777777777777777777777777777777777777777777777777777777777777777777
+									return
+								}
+							}
+						} else if bloqueDeApun.Apuntadores[i] == -1 {
+							//tengo que actualizar el bloque de apuntadores
+							bloqueDeApun.Apuntadores[i] = int32(sp.PrimerBloqueLibre)
+							EscribirBloqueApuntadores(ruta, posSeek, bloqueDeApun)
+							//TOCA CREAR EL BLOQUE CARPETA
+							//======================================crear el bloqueCrpeta nuevo
+							bloqueCarpeta := BloqueDeCarpeta{}
+							for i := 0; i < len(bloqueCarpeta.BContent); i++ {
+								bloqueCarpeta.BContent[i].Apuntador = -1
+							}
+							//lleno celdas
+							copy(bloqueCarpeta.BContent[0].Name[:], nombre)
+							bloqueCarpeta.BContent[0].Apuntador = int32(sp.PrimerInodoLibre)
+							seekBC := calcularPosicionDeBloqueEnElArchivo(sp.PrimerBloqueLibre, sp)
+							EscribirBloqueCarpeta(ruta, seekBC, bloqueCarpeta)
+							//actualizar los bitmap--------------------------------------------------
+							EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre)
+							//ahora actualizo el superBloque
+							sp.NumDeBloquesLibres--
+							sp.PrimerBloqueLibre++
+							EscribirSuperBloque(ruta, partition, sp) //-------------------------------
+
+							//
+							//ahora si va todo lo demas
+							//creo el nuevo inodo
+							nuevoInodoBloqueCarpeta(ruta, posicionEstructura, sp) // posicion estructura es el padre
+
+							//actualizar los bitmap----------------------------------------------
+							EscribirByteBM(ruta, sp.StartBMdeInodos+sp.PrimerInodoLibre)
+							EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre)
+
+							//ahora actualizo el superBloque
+							sp.NumDeInodosLibres--
+							sp.NumDeBloquesLibres--
+							sp.PrimerInodoLibre++
+							sp.PrimerBloqueLibre++
+							EscribirSuperBloque(ruta, partition, sp) //-----------------------------
+
+							fmt.Println("Se ha creado una carpeta en un -1 de un bloqueDeApun indirecto verga")
+							//777777777777777777777777777777777777777777777777777777777777777777777777777
+							fmt.Println("\nde bloques")
+							f := leerBytes(ruta, 10, sp.StartBMdeBloques)
+							for i := 0; i < 10; i++ {
+								if f[i] == 0 {
+									fmt.Print(0)
+								} else if f[i] == 1 {
+									fmt.Print(1)
+								}
+
+							}
+							fmt.Println("\nde de inodos")
+							ff := leerBytes(ruta, 10, sp.StartBMdeInodos)
+							for i := 0; i < 10; i++ {
+								if ff[i] == 0 {
+									fmt.Print(0)
+								} else if ff[i] == 1 {
+									fmt.Print(1)
+								}
+							}
+							fmt.Println()
+							LeerInodo(ruta, sp.StartTablaDeInodos) // de aqui pabajo nel
+							fmt.Println("Bloque carpeta 3")
+							vb := leerBloqueDeCarpetas(ruta, calcularPosicionDeBloqueEnElArchivo(7, sp))
+							if vb != vb {
+
+							}
+							fmt.Println("Bloque de apuntadores")
+							bl := BloqueDeApuntadores{}
+							fa := leerElBloqueDeApuntadores(ruta, calcularPosicionDeBloqueEnElArchivo(1, sp))
+							if bl == fa {
+
+							}
+							//777777777777777777777777777777777777777777777777777777777777777777777777777
+
+							return
+						}
+					}
+
+				} else if inodo.IBlock[i] == -1 {
+					fmt.Println("\n\n YA ENTRO AL -1 en el elseif ==-1 && == 13")
+					//actualizo el inodo
+					inodo.IBlock[i] = sp.PrimerBloqueLibre
+					EscribirInodo(ruta, posicionEstructuraArch, inodo)
+
+					//=======================================creo el primer bloque de apuntadores
+					bloqueApuntadores := BloqueDeApuntadores{}
+					for i := 0; i < len(bloqueApuntadores.Apuntadores); i++ {
+						bloqueApuntadores.Apuntadores[i] = -1
+					}
+					bloqueApuntadores.Apuntadores[0] = int32(sp.PrimerBloqueLibre) + 1
+					seekBC := calcularPosicionDeBloqueEnElArchivo(sp.PrimerBloqueLibre, sp)
+					EscribirBloqueApuntadores(ruta, seekBC, bloqueApuntadores)
+					//actualizar los bitmap--------------------------------------------------
+					EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre)
+					//ahora actualizo el superBloque
+					sp.NumDeBloquesLibres--
+					sp.PrimerBloqueLibre++
+					EscribirSuperBloque(ruta, partition, sp) //-------------------------------
+
+					//TOCA CREAR EL BLOQUE CARPETA
+					//======================================crear el bloqueCrpeta nuevo
+					bloqueCarpeta := BloqueDeCarpeta{}
+					for i := 0; i < len(bloqueCarpeta.BContent); i++ {
+						bloqueCarpeta.BContent[i].Apuntador = -1
+					}
+					//lleno celdas
+					copy(bloqueCarpeta.BContent[0].Name[:], nombre)
+					bloqueCarpeta.BContent[0].Apuntador = int32(sp.PrimerInodoLibre)
+					seekBC = calcularPosicionDeBloqueEnElArchivo(sp.PrimerBloqueLibre, sp)
+					EscribirBloqueCarpeta(ruta, seekBC, bloqueCarpeta)
 					//actualizar los bitmap--------------------------------------------------
 					EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre)
 					//ahora actualizo el superBloque
@@ -303,9 +533,9 @@ func buscarEspacioLibreEnBloqueCarpeta(ruta string, posicionEstructura int64, sp
 					sp.PrimerBloqueLibre++
 					EscribirSuperBloque(ruta, partition, sp) //-----------------------------
 
-					fmt.Println("Se ha creado una nuevecita")
-					LeerInodo(ruta, sp.StartTablaDeInodos)
-					fmt.Println("de bloques")
+					fmt.Println("Se ha creado una carpeta en un indirecto NUEVO")
+					//777777777777777777777777777777777777777777777777777777777777777777777777777
+					fmt.Println("\nde bloques")
 					f := leerBytes(ruta, 5, sp.StartBMdeBloques)
 					for i := 0; i < 5; i++ {
 						if f[i] == 0 {
@@ -314,7 +544,7 @@ func buscarEspacioLibreEnBloqueCarpeta(ruta string, posicionEstructura int64, sp
 							fmt.Print(1)
 						}
 					}
-					fmt.Println("de de inodos")
+					fmt.Println("\nde de inodos")
 					ff := leerBytes(ruta, 5, sp.StartBMdeInodos)
 					for i := 0; i < 5; i++ {
 						if ff[i] == 0 {
@@ -324,11 +554,297 @@ func buscarEspacioLibreEnBloqueCarpeta(ruta string, posicionEstructura int64, sp
 						}
 					}
 					fmt.Println()
-
-					vb := leerBloqueDeCarpetas(ruta, sp.StartTablaDeBloques)
+					LeerInodo(ruta, sp.StartTablaDeInodos) // de aqui pabajo nel
+					fmt.Println("Bloque carpeta 3")
+					vb := leerBloqueDeCarpetas(ruta, calcularPosicionDeBloqueEnElArchivo(2, sp))
 					if vb != bloqueCarpeta {
 
 					}
+					fmt.Println("Bloque de apuntadores")
+					bl := BloqueDeApuntadores{}
+					fa := leerElBloqueDeApuntadores(ruta, calcularPosicionDeBloqueEnElArchivo(1, sp))
+					if bl == fa {
+
+					}
+					//777777777777777777777777777777777777777777777777777777777777777777777777777
+					return
+				}
+			} else if i == 14 {
+				if inodo.IBlock[i] != -1 {
+					posSeek := calcularPosicionDeBloqueEnElArchivo(inodo.IBlock[i], sp)
+					bloqueDeApun := leerElBloqueDeApuntadores(ruta, posSeek)
+
+					for i := 0; i < len(bloqueDeApun.Apuntadores); i++ {
+
+						if bloqueDeApun.Apuntadores[i] != -1 {
+
+							posSeek2 := calcularPosicionDeBloqueEnElArchivo(int64(bloqueDeApun.Apuntadores[i]), sp)
+							bloqueDeApun2 := leerElBloqueDeApuntadores(ruta, posSeek2)
+
+							for i := 0; i < len(bloqueDeApun2.Apuntadores); i++ {
+								if bloqueDeApun2.Apuntadores[i] != -1 {
+
+									posSeek := calcularPosicionDeBloqueEnElArchivo(int64(bloqueDeApun2.Apuntadores[i]), sp)
+									blCarpeta := leerElBloqueCarpeta(ruta, posSeek)
+
+									//recorro el bloqueCarpeta
+									for j := 0; j < len(blCarpeta.BContent); j++ {
+
+										if blCarpeta.BContent[j].Apuntador == -1 {
+											//lleno celdas y sobrescribo
+											copy(blCarpeta.BContent[j].Name[:], nombre)
+											blCarpeta.BContent[j].Apuntador = int32(sp.PrimerInodoLibre) //lo tengo que mandar el crearPack
+											EscribirBloqueCarpeta(ruta, posSeek, blCarpeta)
+
+											//creo el nuevo inodo
+											nuevoInodoBloqueCarpeta(ruta, posicionEstructura, sp) // posicion estructura es el padre
+
+											//actualizar los bitmap----------------------------------------------
+											EscribirByteBM(ruta, sp.StartBMdeInodos+sp.PrimerInodoLibre)
+											EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre)
+
+											//ahora actualizo el superBloque
+											sp.NumDeInodosLibres--
+											sp.NumDeBloquesLibres--
+											sp.PrimerInodoLibre++
+											sp.PrimerBloqueLibre++
+											EscribirSuperBloque(ruta, partition, sp) //-----------------------------
+
+											fmt.Println("ALAVENCHA1Se ha creado la carpeta en un indirecto doble cuando ya existian mas")
+
+											//777777777777777777777777777777777777777777777777777777777777777777777777777
+											fmt.Println("\nde bloques")
+											f := leerBytes(ruta, 25, sp.StartBMdeBloques)
+											for i := 0; i < 25; i++ {
+												if f[i] == 0 {
+													fmt.Print(0)
+												} else if f[i] == 1 {
+													fmt.Print(1)
+												}
+											}
+											fmt.Println("\nde de inodos")
+											ff := leerBytes(ruta, 25, sp.StartBMdeInodos)
+											for i := 0; i < 25; i++ {
+												if ff[i] == 0 {
+													fmt.Print(0)
+												} else if ff[i] == 1 {
+													fmt.Print(1)
+												}
+											}
+											fmt.Println()
+											LeerInodo(ruta, sp.StartTablaDeInodos) // de aqui pabajo nel
+											fmt.Println("Bloque carpeta 18")
+											vb := leerBloqueDeCarpetas(ruta, calcularPosicionDeBloqueEnElArchivo(18, sp))
+											if vb != vb {
+
+											}
+											fmt.Println("Bloque de apuntadores")
+											bl := BloqueDeApuntadores{}
+											fa := leerElBloqueDeApuntadores(ruta, calcularPosicionDeBloqueEnElArchivo(2, sp))
+											if bl == fa {
+
+											}
+											//777777777777777777777777777777777777777777777777777777777777777777777777777
+
+											return
+										}
+									}
+								} else if bloqueDeApun2.Apuntadores[i] == -1 {
+									//tengo que actualizar el bloque de apuntadores
+									bloqueDeApun2.Apuntadores[i] = int32(sp.PrimerBloqueLibre)
+									EscribirBloqueApuntadores(ruta, posSeek2, bloqueDeApun2)
+									//TOCA CREAR EL BLOQUE CARPETA
+									//======================================crear el bloqueCrpeta nuevo
+									bloqueCarpeta := BloqueDeCarpeta{}
+									for i := 0; i < len(bloqueCarpeta.BContent); i++ {
+										bloqueCarpeta.BContent[i].Apuntador = -1
+									}
+									//lleno celdas
+									copy(bloqueCarpeta.BContent[0].Name[:], nombre)
+									bloqueCarpeta.BContent[0].Apuntador = int32(sp.PrimerInodoLibre)
+									seekBC := calcularPosicionDeBloqueEnElArchivo(sp.PrimerBloqueLibre, sp)
+									EscribirBloqueCarpeta(ruta, seekBC, bloqueCarpeta)
+									//actualizar los bitmap--------------------------------------------------
+									EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre)
+									//ahora actualizo el superBloque
+									sp.NumDeBloquesLibres--
+									sp.PrimerBloqueLibre++
+									EscribirSuperBloque(ruta, partition, sp) //-------------------------------
+
+									//
+									//ahora si va todo lo demas
+									//creo el nuevo inodo
+									nuevoInodoBloqueCarpeta(ruta, posicionEstructura, sp) // posicion estructura es el padre
+
+									//actualizar los bitmap----------------------------------------------
+									EscribirByteBM(ruta, sp.StartBMdeInodos+sp.PrimerInodoLibre)
+									EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre)
+
+									//ahora actualizo el superBloque
+									sp.NumDeInodosLibres--
+									sp.NumDeBloquesLibres--
+									sp.PrimerInodoLibre++
+									sp.PrimerBloqueLibre++
+									EscribirSuperBloque(ruta, partition, sp) //-----------------------------
+
+									fmt.Println("ASUMADREEESe ha creado una carpeta en un -1 de un bloqueDeApun indirectoDOBLE")
+
+									//777777777777777777777777777777777777777777777777777777777777777777777777777
+									fmt.Println("\nde bloques")
+									f := leerBytes(ruta, 25, sp.StartBMdeBloques)
+									for i := 0; i < 25; i++ {
+										if f[i] == 0 {
+											fmt.Print(0)
+										} else if f[i] == 1 {
+											fmt.Print(1)
+										}
+									}
+									fmt.Println("\nde de inodos")
+									ff := leerBytes(ruta, 25, sp.StartBMdeInodos)
+									for i := 0; i < 25; i++ {
+										if ff[i] == 0 {
+											fmt.Print(0)
+										} else if ff[i] == 1 {
+											fmt.Print(1)
+										}
+									}
+									fmt.Println()
+									LeerInodo(ruta, sp.StartTablaDeInodos) // de aqui pabajo nel
+									fmt.Println("Bloque carpeta 24")
+									vb := leerBloqueDeCarpetas(ruta, calcularPosicionDeBloqueEnElArchivo(24, sp))
+									if vb != vb {
+
+									}
+									fmt.Println("Bloque de apuntadores")
+									bl := BloqueDeApuntadores{}
+									fa := leerElBloqueDeApuntadores(ruta, calcularPosicionDeBloqueEnElArchivo(2, sp))
+									if bl == fa {
+
+									}
+									//777777777777777777777777777777777777777777777777777777777777777777777777777
+
+									return
+								}
+							}
+						}
+					}
+				} else if inodo.IBlock[i] == -1 {
+					//actualizo el inodo
+					inodo.IBlock[i] = sp.PrimerBloqueLibre
+					EscribirInodo(ruta, posicionEstructuraArch, inodo)
+
+					//=======================================creo el primer bloque de apuntadores
+					bloqueApuntadores := BloqueDeApuntadores{}
+					for i := 0; i < len(bloqueApuntadores.Apuntadores); i++ {
+						bloqueApuntadores.Apuntadores[i] = -1
+					}
+					seekBC := calcularPosicionDeBloqueEnElArchivo(sp.PrimerBloqueLibre, sp)
+					seekApuntPadre := seekBC //me sirve para reescribir en el for
+					EscribirBloqueApuntadores(ruta, seekBC, bloqueApuntadores)
+
+					//actualizar los bitmap--------------------------------------------------
+					EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre)
+					//ahora actualizo el superBloque
+					sp.NumDeBloquesLibres--
+					sp.PrimerBloqueLibre++
+					EscribirSuperBloque(ruta, partition, sp) //-------------------------------
+
+					//empiezo a llenarlo de otros bloques de apuntadores
+					var aux int64
+					for i := 0; i < len(bloqueApuntadores.Apuntadores); i++ {
+						bloqueApuntadores.Apuntadores[i] = int32(sp.PrimerBloqueLibre)
+						EscribirBloqueApuntadores(ruta, seekApuntPadre, bloqueApuntadores) //lo reescribo
+
+						//creo el bl interno----------------------------------------------------
+						blApInterno := BloqueDeApuntadores{}
+						for i := 0; i < len(blApInterno.Apuntadores); i++ {
+							blApInterno.Apuntadores[i] = -1
+						}
+						seekEs := calcularPosicionDeBloqueEnElArchivo(sp.PrimerBloqueLibre, sp)
+						if i == 0 {
+							aux = seekEs // me va a servir para ir a crear el inodo carpeta
+						}
+						EscribirBloqueApuntadores(ruta, seekEs, blApInterno) //-------------------
+						//actualizar los bitmap--------------------------------------------------
+						EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre)
+						//ahora actualizo el superBloque
+						sp.NumDeBloquesLibres--
+						sp.PrimerBloqueLibre++
+						EscribirSuperBloque(ruta, partition, sp) //-------------------------------
+
+					}
+					//aqui tengo que editar el blApuntador, blCarpeta, y pack inodoCarpeta
+					blAp := leerElBloqueDeApuntadores(ruta, aux)
+					blAp.Apuntadores[0] = int32(sp.PrimerBloqueLibre)
+					EscribirBloqueApuntadores(ruta, aux, blAp)
+
+					//======================================crear el bloqueCrpeta nuevo
+					bloqueCarpeta := BloqueDeCarpeta{}
+					for i := 0; i < len(bloqueCarpeta.BContent); i++ {
+						bloqueCarpeta.BContent[i].Apuntador = -1
+					}
+					//lleno celdas
+					copy(bloqueCarpeta.BContent[0].Name[:], nombre)
+					bloqueCarpeta.BContent[0].Apuntador = int32(sp.PrimerInodoLibre)
+					seekBC = calcularPosicionDeBloqueEnElArchivo(sp.PrimerBloqueLibre, sp)
+					EscribirBloqueCarpeta(ruta, seekBC, bloqueCarpeta)
+
+					//actualizar los bitmap--------------------------------------------------
+					EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre)
+					//ahora actualizo el superBloque
+					sp.NumDeBloquesLibres--
+					sp.PrimerBloqueLibre++
+					EscribirSuperBloque(ruta, partition, sp) //-------------------------------
+
+					nuevoInodoBloqueCarpeta(ruta, posicionEstructura, sp)
+
+					//actualizar los bitmap----------------------------------------------
+					EscribirByteBM(ruta, sp.StartBMdeInodos+sp.PrimerInodoLibre)
+					EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre)
+
+					//ahora actualizo el superBloque
+					sp.NumDeInodosLibres--
+					sp.NumDeBloquesLibres--
+					sp.PrimerInodoLibre++
+					sp.PrimerBloqueLibre++
+					EscribirSuperBloque(ruta, partition, sp) //-----------------------------
+					fmt.Println(sp.PrimerBloqueLibre)
+					fmt.Println("Se ha creado una carpeta nuevecita en el bloque de apuntadores indirecto DOBLE PRIMERO == -1")
+
+					//777777777777777777777777777777777777777777777777777777777777777777777777777
+					fmt.Println("\nde bloques")
+					f := leerBytes(ruta, 21, sp.StartBMdeBloques)
+					for i := 0; i < 21; i++ {
+						if f[i] == 0 {
+							fmt.Print(0)
+						} else if f[i] == 1 {
+							fmt.Print(1)
+						}
+					}
+					fmt.Println("\nde de inodos")
+					ff := leerBytes(ruta, 21, sp.StartBMdeInodos)
+					for i := 0; i < 21; i++ {
+						if ff[i] == 0 {
+							fmt.Print(0)
+						} else if ff[i] == 1 {
+							fmt.Print(1)
+						}
+					}
+					fmt.Println()
+					LeerInodo(ruta, sp.StartTablaDeInodos) // de aqui pabajo nel
+					fmt.Println("Bloque carpeta 18")
+					vb := leerBloqueDeCarpetas(ruta, calcularPosicionDeBloqueEnElArchivo(18, sp))
+					if vb != bloqueCarpeta {
+
+					}
+					fmt.Println("Bloque de apuntadores")
+					bl := BloqueDeApuntadores{}
+					fa := leerElBloqueDeApuntadores(ruta, calcularPosicionDeBloqueEnElArchivo(2, sp))
+					if bl == fa {
+
+					}
+					//777777777777777777777777777777777777777777777777777777777777777777777777777
+
 					return
 				}
 			}
@@ -491,4 +1007,11 @@ func EscribirByteBM(ruta string, seek int64) { // recibe el tamanio del archivo
 		}
 	}
 
+}
+
+func crearBloqueApuntadores() {
+	blApuntadores := BloqueDeApuntadores{}
+	for i := 0; i < len(blApuntadores.Apuntadores); i++ {
+		blApuntadores.Apuntadores[i] = -1
+	}
 }

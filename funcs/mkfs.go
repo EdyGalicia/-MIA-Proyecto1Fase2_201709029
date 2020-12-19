@@ -586,6 +586,24 @@ func EscribirBloqueCarpeta(ruta string, seek int64, blCarpeta BloqueDeCarpeta) {
 
 }
 
+//EscribirBloqueApuntadores escribe un bloque de apuntadores en el posicion que le mande
+func EscribirBloqueApuntadores(ruta string, seek int64, blAp BloqueDeApuntadores) {
+	file, err := os.OpenFile(ruta, os.O_WRONLY, 0644)
+	defer file.Close()
+	if err != nil {
+		fmt.Println("Error al abrir el disco")
+	} else {
+		file.Seek(seek, 0)
+		err = binary.Write(file, binary.LittleEndian, blAp)
+		if err != nil {
+			log.Fatalln(err)
+		} else {
+			fmt.Println("El BloqueApuntadores se ha creado y escrito")
+		}
+	}
+
+}
+
 //EscribirInodo escribe un inodo en la posicion que se le mande (posicion en el archivo)
 func EscribirInodo(ruta string, seek int64, inodo Inodo) {
 
