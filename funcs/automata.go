@@ -28,8 +28,13 @@ func Herramienta(entrada string) (string, []string, []string) {
 		if len(parametros) != 0 { //si vinieron parametros
 			parametros[indice] = strings.ToLower(pareja[0])
 
-			auxE := strings.Replace(pareja[1], "”", "", 2)
-			descripciones[indice] = strings.Replace(auxE, "\"", "", 2)
+			if strings.ToLower(pareja[0]) == "p" {
+				descripciones[indice] = ""
+			} else {
+				auxE := strings.Replace(pareja[1], "”", "", 2)
+				descripciones[indice] = strings.Replace(auxE, "\"", "", 2)
+			}
+
 			indice++
 		}
 	}

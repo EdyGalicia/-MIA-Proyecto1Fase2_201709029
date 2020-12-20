@@ -90,8 +90,12 @@ func checarDireccion(partition Partition, ruta string, carpetas []string, id str
 		pos = Buscar(ruta, pos, carpetas[i], sp)
 		if pos == -1 {
 			//llamo al metodo crear
-			fmt.Println("No se encontro la carpeta, se creara")
-			buscarEspacioLibreEnBloqueCarpeta(ruta, aux, sp, carpetas[i], partition)
+			if p == true {
+				fmt.Println("No se encontro la carpeta, se creara")
+				buscarEspacioLibreEnBloqueCarpeta(ruta, aux, sp, carpetas[i], partition)
+			} else {
+				fmt.Println("No se encontro el padre " + carpetas[i] + " y -p viene falso")
+			}
 		}
 	}
 }
@@ -141,6 +145,7 @@ func Buscar(ruta string, posicionEstructura int64, origen string, sp SuperBloque
 
 					//voy a recorrer los apuntadores
 					for i := 0; i < len(blApuntadores.Apuntadores); i++ {
+
 						if blApuntadores.Apuntadores[i] != -1 {
 
 							//tengo que leer bloques de carpetas
@@ -168,7 +173,7 @@ func Buscar(ruta string, posicionEstructura int64, origen string, sp SuperBloque
 						}
 					}
 				}
-			} else { //sino, es 14, doble indirecto
+			} else if i == 14 { //sino, es 14, doble indirecto
 				if inodo.IBlock[i] != -1 {
 					posSeek := calcularPosicionDeBloqueEnElArchivo(inodo.IBlock[i], sp)
 					blApuntadores := leerElBloqueDeApuntadores(ruta, posSeek)
@@ -183,6 +188,7 @@ func Buscar(ruta string, posicionEstructura int64, origen string, sp SuperBloque
 
 							//recorro el bloque de apuntadores mas profundo
 							for i := 0; i < len(blApuntadores2.Apuntadores); i++ {
+
 								if blApuntadores2.Apuntadores[i] != -1 {
 
 									//leo el bloque carpeta
@@ -190,7 +196,9 @@ func Buscar(ruta string, posicionEstructura int64, origen string, sp SuperBloque
 									blCarpeta := leerElBloqueCarpeta(ruta, seekCarpeta)
 									//recorro el bloqueCaroeta
 									for j := 0; j < len(blCarpeta.BContent); j++ {
+
 										if blCarpeta.BContent[j].Apuntador != -1 {
+
 											temporal := string(blCarpeta.BContent[j].Name[:len(origen)])
 											fmt.Println(origen + "-" + temporal + "-")
 
@@ -248,8 +256,8 @@ func buscarEspacioLibreEnBloqueCarpeta(ruta string, posicionEstructura int64, sp
 							nuevoInodoBloqueCarpeta(ruta, posicionEstructura, sp) // posicion estructura es el padre
 
 							//actualizar los bitmap----------------------------------------------
-							EscribirByteBM(ruta, sp.StartBMdeInodos+sp.PrimerInodoLibre)
-							EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre)
+							EscribirByteBM(ruta, sp.StartBMdeInodos+sp.PrimerInodoLibre, 1)
+							EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre, 1)
 
 							//ahora actualizo el superBloque
 							sp.NumDeInodosLibres--
@@ -280,7 +288,7 @@ func buscarEspacioLibreEnBloqueCarpeta(ruta string, posicionEstructura int64, sp
 					seekBC := calcularPosicionDeBloqueEnElArchivo(sp.PrimerBloqueLibre, sp)
 					EscribirBloqueCarpeta(ruta, seekBC, bloqueCarpeta)
 					//actualizar los bitmap--------------------------------------------------
-					EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre)
+					EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre, 1)
 					//ahora actualizo el superBloque
 					sp.NumDeBloquesLibres--
 					sp.PrimerBloqueLibre++
@@ -291,8 +299,8 @@ func buscarEspacioLibreEnBloqueCarpeta(ruta string, posicionEstructura int64, sp
 					//creo el nuevo inodo
 					nuevoInodoBloqueCarpeta(ruta, posicionEstructura, sp) // posicion estructura es el padre
 					//actualizar los bitmap----------------------------------------------
-					EscribirByteBM(ruta, sp.StartBMdeInodos+sp.PrimerInodoLibre)
-					EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre)
+					EscribirByteBM(ruta, sp.StartBMdeInodos+sp.PrimerInodoLibre, 1)
+					EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre, 1)
 					//ahora actualizo el superBloque
 					sp.NumDeInodosLibres--
 					sp.NumDeBloquesLibres--
@@ -353,8 +361,8 @@ func buscarEspacioLibreEnBloqueCarpeta(ruta string, posicionEstructura int64, sp
 									nuevoInodoBloqueCarpeta(ruta, posicionEstructura, sp) // posicion estructura es el padre
 
 									//actualizar los bitmap----------------------------------------------
-									EscribirByteBM(ruta, sp.StartBMdeInodos+sp.PrimerInodoLibre)
-									EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre)
+									EscribirByteBM(ruta, sp.StartBMdeInodos+sp.PrimerInodoLibre, 1)
+									EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre, 1)
 
 									//ahora actualizo el superBloque
 									sp.NumDeInodosLibres--
@@ -416,7 +424,7 @@ func buscarEspacioLibreEnBloqueCarpeta(ruta string, posicionEstructura int64, sp
 							seekBC := calcularPosicionDeBloqueEnElArchivo(sp.PrimerBloqueLibre, sp)
 							EscribirBloqueCarpeta(ruta, seekBC, bloqueCarpeta)
 							//actualizar los bitmap--------------------------------------------------
-							EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre)
+							EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre, 1)
 							//ahora actualizo el superBloque
 							sp.NumDeBloquesLibres--
 							sp.PrimerBloqueLibre++
@@ -428,8 +436,8 @@ func buscarEspacioLibreEnBloqueCarpeta(ruta string, posicionEstructura int64, sp
 							nuevoInodoBloqueCarpeta(ruta, posicionEstructura, sp) // posicion estructura es el padre
 
 							//actualizar los bitmap----------------------------------------------
-							EscribirByteBM(ruta, sp.StartBMdeInodos+sp.PrimerInodoLibre)
-							EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre)
+							EscribirByteBM(ruta, sp.StartBMdeInodos+sp.PrimerInodoLibre, 1)
+							EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre, 1)
 
 							//ahora actualizo el superBloque
 							sp.NumDeInodosLibres--
@@ -493,7 +501,7 @@ func buscarEspacioLibreEnBloqueCarpeta(ruta string, posicionEstructura int64, sp
 					seekBC := calcularPosicionDeBloqueEnElArchivo(sp.PrimerBloqueLibre, sp)
 					EscribirBloqueApuntadores(ruta, seekBC, bloqueApuntadores)
 					//actualizar los bitmap--------------------------------------------------
-					EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre)
+					EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre, 2)
 					//ahora actualizo el superBloque
 					sp.NumDeBloquesLibres--
 					sp.PrimerBloqueLibre++
@@ -511,7 +519,7 @@ func buscarEspacioLibreEnBloqueCarpeta(ruta string, posicionEstructura int64, sp
 					seekBC = calcularPosicionDeBloqueEnElArchivo(sp.PrimerBloqueLibre, sp)
 					EscribirBloqueCarpeta(ruta, seekBC, bloqueCarpeta)
 					//actualizar los bitmap--------------------------------------------------
-					EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre)
+					EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre, 1)
 					//ahora actualizo el superBloque
 					sp.NumDeBloquesLibres--
 					sp.PrimerBloqueLibre++
@@ -523,8 +531,8 @@ func buscarEspacioLibreEnBloqueCarpeta(ruta string, posicionEstructura int64, sp
 					nuevoInodoBloqueCarpeta(ruta, posicionEstructura, sp) // posicion estructura es el padre
 
 					//actualizar los bitmap----------------------------------------------
-					EscribirByteBM(ruta, sp.StartBMdeInodos+sp.PrimerInodoLibre)
-					EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre)
+					EscribirByteBM(ruta, sp.StartBMdeInodos+sp.PrimerInodoLibre, 1)
+					EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre, 1)
 
 					//ahora actualizo el superBloque
 					sp.NumDeInodosLibres--
@@ -600,8 +608,8 @@ func buscarEspacioLibreEnBloqueCarpeta(ruta string, posicionEstructura int64, sp
 											nuevoInodoBloqueCarpeta(ruta, posicionEstructura, sp) // posicion estructura es el padre
 
 											//actualizar los bitmap----------------------------------------------
-											EscribirByteBM(ruta, sp.StartBMdeInodos+sp.PrimerInodoLibre)
-											EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre)
+											EscribirByteBM(ruta, sp.StartBMdeInodos+sp.PrimerInodoLibre, 1)
+											EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre, 1)
 
 											//ahora actualizo el superBloque
 											sp.NumDeInodosLibres--
@@ -665,7 +673,7 @@ func buscarEspacioLibreEnBloqueCarpeta(ruta string, posicionEstructura int64, sp
 									seekBC := calcularPosicionDeBloqueEnElArchivo(sp.PrimerBloqueLibre, sp)
 									EscribirBloqueCarpeta(ruta, seekBC, bloqueCarpeta)
 									//actualizar los bitmap--------------------------------------------------
-									EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre)
+									EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre, 1)
 									//ahora actualizo el superBloque
 									sp.NumDeBloquesLibres--
 									sp.PrimerBloqueLibre++
@@ -677,8 +685,8 @@ func buscarEspacioLibreEnBloqueCarpeta(ruta string, posicionEstructura int64, sp
 									nuevoInodoBloqueCarpeta(ruta, posicionEstructura, sp) // posicion estructura es el padre
 
 									//actualizar los bitmap----------------------------------------------
-									EscribirByteBM(ruta, sp.StartBMdeInodos+sp.PrimerInodoLibre)
-									EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre)
+									EscribirByteBM(ruta, sp.StartBMdeInodos+sp.PrimerInodoLibre, 1)
+									EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre, 1)
 
 									//ahora actualizo el superBloque
 									sp.NumDeInodosLibres--
@@ -743,7 +751,7 @@ func buscarEspacioLibreEnBloqueCarpeta(ruta string, posicionEstructura int64, sp
 					EscribirBloqueApuntadores(ruta, seekBC, bloqueApuntadores)
 
 					//actualizar los bitmap--------------------------------------------------
-					EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre)
+					EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre, 2)
 					//ahora actualizo el superBloque
 					sp.NumDeBloquesLibres--
 					sp.PrimerBloqueLibre++
@@ -766,7 +774,7 @@ func buscarEspacioLibreEnBloqueCarpeta(ruta string, posicionEstructura int64, sp
 						}
 						EscribirBloqueApuntadores(ruta, seekEs, blApInterno) //-------------------
 						//actualizar los bitmap--------------------------------------------------
-						EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre)
+						EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre, 2)
 						//ahora actualizo el superBloque
 						sp.NumDeBloquesLibres--
 						sp.PrimerBloqueLibre++
@@ -790,7 +798,7 @@ func buscarEspacioLibreEnBloqueCarpeta(ruta string, posicionEstructura int64, sp
 					EscribirBloqueCarpeta(ruta, seekBC, bloqueCarpeta)
 
 					//actualizar los bitmap--------------------------------------------------
-					EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre)
+					EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre, 1)
 					//ahora actualizo el superBloque
 					sp.NumDeBloquesLibres--
 					sp.PrimerBloqueLibre++
@@ -799,8 +807,8 @@ func buscarEspacioLibreEnBloqueCarpeta(ruta string, posicionEstructura int64, sp
 					nuevoInodoBloqueCarpeta(ruta, posicionEstructura, sp)
 
 					//actualizar los bitmap----------------------------------------------
-					EscribirByteBM(ruta, sp.StartBMdeInodos+sp.PrimerInodoLibre)
-					EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre)
+					EscribirByteBM(ruta, sp.StartBMdeInodos+sp.PrimerInodoLibre, 1)
+					EscribirByteBM(ruta, sp.StartBMdeBloques+sp.PrimerBloqueLibre, 1)
 
 					//ahora actualizo el superBloque
 					sp.NumDeInodosLibres--
@@ -822,8 +830,8 @@ func buscarEspacioLibreEnBloqueCarpeta(ruta string, posicionEstructura int64, sp
 						}
 					}
 					fmt.Println("\nde de inodos")
-					ff := leerBytes(ruta, 21, sp.StartBMdeInodos)
-					for i := 0; i < 21; i++ {
+					ff := leerBytes(ruta, 25, sp.StartBMdeInodos)
+					for i := 0; i < 25; i++ {
 						if ff[i] == 0 {
 							fmt.Print(0)
 						} else if ff[i] == 1 {
@@ -986,7 +994,7 @@ func nuevoInodoBloqueCarpeta(ruta string, padre int64, sp SuperBloque) {
 }
 
 //EscribirByteBM escribe un byte en el bitmap
-func EscribirByteBM(ruta string, seek int64) { // recibe el tamanio del archivo
+func EscribirByteBM(ruta string, seek int64, bl int) { // recibe el tamanio del archivo
 
 	file, err := os.OpenFile(ruta, os.O_WRONLY, 0644)
 	if err != nil {
@@ -997,7 +1005,14 @@ func EscribirByteBM(ruta string, seek int64) { // recibe el tamanio del archivo
 		var a []byte
 		a = make([]byte, tamanio, tamanio)
 		for i := 0; i < tamanio; i++ {
-			a[i] = 1
+			if bl == 1 {
+				a[i] = 1
+			} else if bl == 2 {
+				a[i] = 2
+			} else if bl == 3 {
+				a[i] = 3
+			}
+
 		}
 
 		_, err = file.Write(a)

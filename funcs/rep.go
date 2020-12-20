@@ -52,6 +52,26 @@ func EjecutarREP(parametros []string, descripciones []string) {
 			{
 				crearReporteDISK(ruta, id)
 			}
+		case "inode":
+			{
+				crearReporteInode(ruta, id)
+			}
+		case "block":
+			{
+				crearReporteBlock(ruta, id)
+			}
+		case "bm_inode":
+			{
+				crearReporteBmInode(ruta, id)
+			}
+		case "bm_block":
+			{
+				crearReporteBmBlock(ruta, id)
+			}
+		case "sb":
+			{
+				crearReporteSb(ruta, id)
+			}
 		default:
 			{
 				fmt.Println("Nombre de reporte no valido")

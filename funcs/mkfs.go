@@ -257,7 +257,7 @@ func darFormatoInicial(p Partition, ruta string) {
 
 	//f := SuperBloque{}
 
-	superBLoque.TipoDeSistemaDeArchivos = 0
+	superBLoque.TipoDeSistemaDeArchivos = 3
 
 	superBLoque.NumTotalDeInodos = int64(N)
 	superBLoque.NumTotalDeBloques = 3 * int64(N)
