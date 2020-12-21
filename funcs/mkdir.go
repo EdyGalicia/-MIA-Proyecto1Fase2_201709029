@@ -82,17 +82,24 @@ func validarID(carpetas []string, id string, p bool) {
 func checarDireccion(partition Partition, ruta string, carpetas []string, id string, p bool) {
 	fmt.Println("Ya estoy en checarDireccion")
 	//aqui tengo que hacer lo de id de las mierdas que estan montadas
-	sp := LeerSuperBloque(ruta, partition.PartStart)
+	//sp := LeerSuperBloque(ruta, partition.PartStart)
 
 	var pos int64 = 0
-	for i := 0; i < len(carpetas); i++ {
+	for i := 1; i < len(carpetas); i++ {
+		sp := LeerSuperBloque(ruta, partition.PartStart)
 		aux := pos
+		fmt.Println("))))))))))))))))))))))))))))))))))))))))))))))))))))voy a ir a buscar" + carpetas[i] + " en")
+		fmt.Println(pos)
 		pos = Buscar(ruta, pos, carpetas[i], sp)
 		if pos == -1 {
 			//llamo al metodo crear
 			if p == true {
 				fmt.Println("No se encontro la carpeta, se creara")
 				buscarEspacioLibreEnBloqueCarpeta(ruta, aux, sp, carpetas[i], partition)
+				sp = LeerSuperBloque(ruta, partition.PartStart)
+				pos = sp.PrimerInodoLibre - int64(1)
+				fmt.Println("))))))))))))))))))))))))))))))))))))))))))))))))))))")
+				fmt.Println(pos)
 			} else {
 				fmt.Println("No se encontro el padre " + carpetas[i] + " y -p viene falso")
 			}
@@ -236,7 +243,7 @@ func buscarEspacioLibreEnBloqueCarpeta(ruta string, posicionEstructura int64, sp
 	inodo := leerElInodo(ruta, posicionEstructuraArch)
 	//iasd := Inodo{}
 	if inodo.IType[0] == 0 {
-		for i := 14; i < len(inodo.IBlock); i++ {
+		for i := 0; i < len(inodo.IBlock); i++ {
 			if i >= 0 && i <= 12 { //busco en los directos
 				if inodo.IBlock[i] != -1 {
 
