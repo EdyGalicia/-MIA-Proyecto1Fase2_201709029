@@ -139,7 +139,23 @@ func generarCuerpoRepBlock(p Partition, ruta string) string {
 				Cuerpo += "</table> >\n ];\n"
 			}
 		} else if bytesDelBMBloques[i] == 3 { // si es un bloque de archivos
+			if int64(i) < sp.PrimerBloqueLibre {
+				posSeek := calcularPosicionDeBloqueEnElArchivo(int64(i), sp)
+				bloqueArchivo := leerBloqueDeArchivos(ruta, posSeek)
 
+				iden := "node" + strconv.Itoa(i)
+
+				Cuerpo += iden + "[ \n shape=plaintext \n label=< \n <table border='1' \n cellborder='1'> \n <tr><td colspan=\"1\" BGCOLOR=\"green\" >" + "Bloque Archivo " + strconv.Itoa(i) + "</td></tr>\n"
+
+				cad := ""
+				for i := 0; i < len(bloqueArchivo.Contenido); i++ {
+					g := int(bloqueArchivo.Contenido[i])
+					cad += strconv.Itoa(g)
+				}
+
+				Cuerpo += "<TR><TD>" + cad + "</TD></TR>\n"
+				Cuerpo += "</table> >\n ];\n"
+			}
 		}
 	}
 	Cuerpo += "\n}"

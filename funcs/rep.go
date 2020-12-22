@@ -14,6 +14,7 @@ func EjecutarREP(parametros []string, descripciones []string) {
 	var nombre string
 	var ruta string
 	var id string
+	var directorio string
 	hayError := false
 
 	for i := 0; i < len(parametros); i++ {
@@ -29,6 +30,10 @@ func EjecutarREP(parametros []string, descripciones []string) {
 		case "id":
 			{
 				id = descripciones[i]
+			}
+		case "ruta":
+			{
+				directorio = descripciones[i]
 			}
 		default:
 			{
@@ -71,6 +76,14 @@ func EjecutarREP(parametros []string, descripciones []string) {
 		case "sb":
 			{
 				crearReporteSb(ruta, id)
+			}
+		case "tree":
+			{
+				crearReporteTree(ruta, id)
+			}
+		case "file":
+			{
+				crearReporteFile(ruta, id, directorio)
 			}
 		default:
 			{

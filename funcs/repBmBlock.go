@@ -96,7 +96,12 @@ func generarCuerpoRepBmBlock(p Partition, ruta string) string {
 				Cuerpo += "1\n"
 				count = -1
 			} else {
+				//if bytesDelBMInodos[i] == 3 {
+				//	Cuerpo += "3 "
+				//} else {
 				Cuerpo += "1 "
+				//}
+
 			}
 		}
 		count++

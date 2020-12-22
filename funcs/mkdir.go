@@ -88,8 +88,8 @@ func checarDireccion(partition Partition, ruta string, carpetas []string, id str
 	for i := 1; i < len(carpetas); i++ {
 		sp := LeerSuperBloque(ruta, partition.PartStart)
 		aux := pos
-		fmt.Println("))))))))))))))))))))))))))))))))))))))))))))))))))))voy a ir a buscar" + carpetas[i] + " en")
-		fmt.Println(pos)
+		//fmt.Println("))))))))))))))))))))))))))))))))))))))))))))))))))))voy a ir a buscar" + carpetas[i] + " en")
+		//fmt.Println(pos)
 		pos = Buscar(ruta, pos, carpetas[i], sp)
 		if pos == -1 {
 			//llamo al metodo crear
@@ -98,10 +98,11 @@ func checarDireccion(partition Partition, ruta string, carpetas []string, id str
 				buscarEspacioLibreEnBloqueCarpeta(ruta, aux, sp, carpetas[i], partition)
 				sp = LeerSuperBloque(ruta, partition.PartStart)
 				pos = sp.PrimerInodoLibre - int64(1)
-				fmt.Println("))))))))))))))))))))))))))))))))))))))))))))))))))))")
-				fmt.Println(pos)
+				//fmt.Println("))))))))))))))))))))))))))))))))))))))))))))))))))))")
+				//fmt.Println(pos)
 			} else {
 				fmt.Println("No se encontro el padre " + carpetas[i] + " y -p viene falso")
+				break
 			}
 		}
 	}
@@ -380,7 +381,7 @@ func buscarEspacioLibreEnBloqueCarpeta(ruta string, posicionEstructura int64, sp
 
 									fmt.Println("Se ha creado la carpeta en un indirecto con pero encintro bloque carpeta, osea  -1")
 									//777777777777777777777777777777777777777777777777777777777777777777777777777
-									fmt.Println("\nde bloques")
+									/*fmt.Println("\nde bloques")
 									f := leerBytes(ruta, 5, sp.StartBMdeBloques)
 									for i := 0; i < 5; i++ {
 										if f[i] == 0 {
@@ -410,7 +411,7 @@ func buscarEspacioLibreEnBloqueCarpeta(ruta string, posicionEstructura int64, sp
 									fa := leerElBloqueDeApuntadores(ruta, calcularPosicionDeBloqueEnElArchivo(1, sp))
 									if bl == fa {
 
-									}
+									}*/
 									//777777777777777777777777777777777777777777777777777777777777777777777777777
 									return
 								}
@@ -455,7 +456,7 @@ func buscarEspacioLibreEnBloqueCarpeta(ruta string, posicionEstructura int64, sp
 
 							fmt.Println("Se ha creado una carpeta en un -1 de un bloqueDeApun indirecto verga")
 							//777777777777777777777777777777777777777777777777777777777777777777777777777
-							fmt.Println("\nde bloques")
+							/*fmt.Println("\nde bloques")
 							f := leerBytes(ruta, 10, sp.StartBMdeBloques)
 							for i := 0; i < 10; i++ {
 								if f[i] == 0 {
@@ -486,7 +487,7 @@ func buscarEspacioLibreEnBloqueCarpeta(ruta string, posicionEstructura int64, sp
 							fa := leerElBloqueDeApuntadores(ruta, calcularPosicionDeBloqueEnElArchivo(1, sp))
 							if bl == fa {
 
-							}
+							}*/
 							//777777777777777777777777777777777777777777777777777777777777777777777777777
 
 							return
@@ -550,7 +551,7 @@ func buscarEspacioLibreEnBloqueCarpeta(ruta string, posicionEstructura int64, sp
 
 					fmt.Println("Se ha creado una carpeta en un indirecto NUEVO")
 					//777777777777777777777777777777777777777777777777777777777777777777777777777
-					fmt.Println("\nde bloques")
+					/*fmt.Println("\nde bloques")
 					f := leerBytes(ruta, 5, sp.StartBMdeBloques)
 					for i := 0; i < 5; i++ {
 						if f[i] == 0 {
@@ -580,7 +581,7 @@ func buscarEspacioLibreEnBloqueCarpeta(ruta string, posicionEstructura int64, sp
 					fa := leerElBloqueDeApuntadores(ruta, calcularPosicionDeBloqueEnElArchivo(1, sp))
 					if bl == fa {
 
-					}
+					}*/
 					//777777777777777777777777777777777777777777777777777777777777777777777777777
 					return
 				}
@@ -628,7 +629,7 @@ func buscarEspacioLibreEnBloqueCarpeta(ruta string, posicionEstructura int64, sp
 											fmt.Println("ALAVENCHA1Se ha creado la carpeta en un indirecto doble cuando ya existian mas")
 
 											//777777777777777777777777777777777777777777777777777777777777777777777777777
-											fmt.Println("\nde bloques")
+											/*fmt.Println("\nde bloques")
 											f := leerBytes(ruta, 25, sp.StartBMdeBloques)
 											for i := 0; i < 25; i++ {
 												if f[i] == 0 {
@@ -658,7 +659,7 @@ func buscarEspacioLibreEnBloqueCarpeta(ruta string, posicionEstructura int64, sp
 											fa := leerElBloqueDeApuntadores(ruta, calcularPosicionDeBloqueEnElArchivo(2, sp))
 											if bl == fa {
 
-											}
+											}*/
 											//777777777777777777777777777777777777777777777777777777777777777777777777777
 
 											return
@@ -705,7 +706,7 @@ func buscarEspacioLibreEnBloqueCarpeta(ruta string, posicionEstructura int64, sp
 									fmt.Println("ASUMADREEESe ha creado una carpeta en un -1 de un bloqueDeApun indirectoDOBLE")
 
 									//777777777777777777777777777777777777777777777777777777777777777777777777777
-									fmt.Println("\nde bloques")
+									/*fmt.Println("\nde bloques")
 									f := leerBytes(ruta, 25, sp.StartBMdeBloques)
 									for i := 0; i < 25; i++ {
 										if f[i] == 0 {
@@ -735,7 +736,7 @@ func buscarEspacioLibreEnBloqueCarpeta(ruta string, posicionEstructura int64, sp
 									fa := leerElBloqueDeApuntadores(ruta, calcularPosicionDeBloqueEnElArchivo(2, sp))
 									if bl == fa {
 
-									}
+									}*/
 									//777777777777777777777777777777777777777777777777777777777777777777777777777
 
 									return
@@ -827,7 +828,7 @@ func buscarEspacioLibreEnBloqueCarpeta(ruta string, posicionEstructura int64, sp
 					fmt.Println("Se ha creado una carpeta nuevecita en el bloque de apuntadores indirecto DOBLE PRIMERO == -1")
 
 					//777777777777777777777777777777777777777777777777777777777777777777777777777
-					fmt.Println("\nde bloques")
+					/*fmt.Println("\nde bloques")
 					f := leerBytes(ruta, 21, sp.StartBMdeBloques)
 					for i := 0; i < 21; i++ {
 						if f[i] == 0 {
@@ -857,7 +858,7 @@ func buscarEspacioLibreEnBloqueCarpeta(ruta string, posicionEstructura int64, sp
 					fa := leerElBloqueDeApuntadores(ruta, calcularPosicionDeBloqueEnElArchivo(2, sp))
 					if bl == fa {
 
-					}
+					}*/
 					//777777777777777777777777777777777777777777777777777777777777777777777777777
 
 					return

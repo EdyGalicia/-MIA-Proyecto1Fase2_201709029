@@ -107,6 +107,10 @@ func TipoDeInstruccion(entrada string) {
 			fmt.Println(descrip)
 			EjecutarMKDIR(param, descrip)
 		}
+	case "mkfile":
+		{
+			EjecutarMKFILE(param, descrip)
+		}
 	default:
 		{
 			fmt.Println("El comando es incorrecto.")
