@@ -13,17 +13,13 @@ import (
 //EjecutarMKDIR ejecuta el comando mkdir (crear carpetas)
 func EjecutarMKDIR(parametros []string, descripciones []string) {
 	fmt.Println("\n\n\n\n === EJECUTANDO COMANDO MKDIR === ")
-	var id, ruta string
+	var ruta string
 	var p, hayError bool
 	for i := 0; i < len(parametros); i++ {
 		switch parametros[i] {
 		case "path":
 			{
 				ruta = descripciones[i]
-			}
-		case "id":
-			{
-				id = descripciones[i]
 			}
 		case "p":
 			{
@@ -36,41 +32,32 @@ func EjecutarMKDIR(parametros []string, descripciones []string) {
 			}
 		}
 	}
-	if hayError == false {
+	if hayError == false && ruta != "" {
 
 		carpetas := strings.Split(ruta, "/")
 		//voy a revisar el ID
-		validarID(carpetas, id, p)
+		validarID(carpetas, p)
 
 	}
 }
 
-func validarID(carpetas []string, id string, p bool) {
+func validarID(carpetas []string, p bool) {
 
-	rutaDelDisco := ""
-	nombreDeLaParticion := ""
-	for i := 0; i < len(ParticionesMontadas); i++ {
-		if id == ParticionesMontadas[i].id {
-			rutaDelDisco = ParticionesMontadas[i].ruta
-			nombreDeLaParticion = ParticionesMontadas[i].nombre
-			break
-		}
-	}
-	if rutaDelDisco != "" && nombreDeLaParticion != "" {
+	if LaRutaDelDisco != "" && NombreDeLaPartition != "" {
 		//aqui va a suceder la magia
-		mbr := LeerMBR(rutaDelDisco)
+		mbr := LeerMBR(LaRutaDelDisco)
 
 		//me retorna el numero de particion que se va a utilizar
-		numP := encontrarPartition(mbr, nombreDeLaParticion)
+		numP := encontrarPartition(mbr, NombreDeLaPartition)
 
 		if numP == 1 {
-			checarDireccion(mbr.MbrPartition1, rutaDelDisco, carpetas, id, p)
+			checarDireccion(mbr.MbrPartition1, LaRutaDelDisco, carpetas, p)
 		} else if numP == 2 {
-			checarDireccion(mbr.MbrPartition2, rutaDelDisco, carpetas, id, p)
+			checarDireccion(mbr.MbrPartition2, LaRutaDelDisco, carpetas, p)
 		} else if numP == 3 {
-			checarDireccion(mbr.MbrPartition3, rutaDelDisco, carpetas, id, p)
+			checarDireccion(mbr.MbrPartition3, LaRutaDelDisco, carpetas, p)
 		} else if numP == 4 {
-			checarDireccion(mbr.MbrPartition4, rutaDelDisco, carpetas, id, p)
+			checarDireccion(mbr.MbrPartition4, LaRutaDelDisco, carpetas, p)
 		} else {
 			fmt.Println("No se encontro la particion")
 		}
@@ -79,7 +66,7 @@ func validarID(carpetas []string, id string, p bool) {
 
 }
 
-func checarDireccion(partition Partition, ruta string, carpetas []string, id string, p bool) {
+func checarDireccion(partition Partition, ruta string, carpetas []string, p bool) {
 	fmt.Println("Ya estoy en checarDireccion")
 	//aqui tengo que hacer lo de id de las mierdas que estan montadas
 	//sp := LeerSuperBloque(ruta, partition.PartStart)

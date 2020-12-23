@@ -3,7 +3,6 @@ package funcs
 import (
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 )
 
@@ -105,8 +104,14 @@ func getContenidoDeArchivo(ruta string, p Partition, numInodo int64) string {
 				bloqueArchivo := leerBloqueDeArchivos(ruta, posSeek)
 				cad := ""
 				for i := 0; i < len(bloqueArchivo.Contenido); i++ {
-					g := int(bloqueArchivo.Contenido[i])
-					cad += strconv.Itoa(g)
+					//g := int(bloqueArchivo.Contenido[i])
+					//cad += strconv.Itoa(g)
+					if string(bloqueArchivo.Contenido[i]) == "?" {
+
+					} else {
+						cad += string(bloqueArchivo.Contenido[i])
+					}
+
 				}
 				Cuerpo += cad + " "
 			}
@@ -121,8 +126,13 @@ func getContenidoDeArchivo(ruta string, p Partition, numInodo int64) string {
 						bloqueArchivo := leerBloqueDeArchivos(ruta, posSeek)
 						cad := ""
 						for i := 0; i < len(bloqueArchivo.Contenido); i++ {
-							g := int(bloqueArchivo.Contenido[i])
-							cad += strconv.Itoa(g)
+							//g := int(bloqueArchivo.Contenido[i])
+							//cad += strconv.Itoa(g)
+							if string(bloqueArchivo.Contenido[i]) == "?" {
+
+							} else {
+								cad += string(bloqueArchivo.Contenido[i])
+							}
 						}
 						Cuerpo += cad + " "
 					}
@@ -145,8 +155,13 @@ func getContenidoDeArchivo(ruta string, p Partition, numInodo int64) string {
 								bloqueArchivo := leerBloqueDeArchivos(ruta, posSeek)
 								cad := ""
 								for i := 0; i < len(bloqueArchivo.Contenido); i++ {
-									g := int(bloqueArchivo.Contenido[i])
-									cad += strconv.Itoa(g)
+									//g := int(bloqueArchivo.Contenido[i])
+									//cad += strconv.Itoa(g)
+									if string(bloqueArchivo.Contenido[i]) == "?" {
+
+									} else {
+										cad += string(bloqueArchivo.Contenido[i])
+									}
 								}
 								Cuerpo += cad + " "
 							}

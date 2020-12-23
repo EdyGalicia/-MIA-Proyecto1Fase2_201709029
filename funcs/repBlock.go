@@ -149,8 +149,8 @@ func generarCuerpoRepBlock(p Partition, ruta string) string {
 
 				cad := ""
 				for i := 0; i < len(bloqueArchivo.Contenido); i++ {
-					g := int(bloqueArchivo.Contenido[i])
-					cad += strconv.Itoa(g)
+					//g := int(bloqueArchivo.Contenido[i])
+					cad += string(bloqueArchivo.Contenido[i])
 				}
 
 				Cuerpo += "<TR><TD>" + cad + "</TD></TR>\n"

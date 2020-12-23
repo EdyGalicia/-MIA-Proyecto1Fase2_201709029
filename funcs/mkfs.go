@@ -262,8 +262,8 @@ func darFormatoInicial(p Partition, ruta string) {
 	superBLoque.NumTotalDeInodos = int64(N)
 	superBLoque.NumTotalDeBloques = 3 * int64(N)
 
-	superBLoque.NumDeBloquesLibres = (3 * int64(N)) - 1
-	superBLoque.NumDeInodosLibres = (int64(N)) - 1
+	superBLoque.NumDeBloquesLibres = (3 * int64(N)) - 14
+	superBLoque.NumDeInodosLibres = (int64(N)) - 2
 
 	today := time.Now()
 	var fecha [16]byte
@@ -279,8 +279,8 @@ func darFormatoInicial(p Partition, ruta string) {
 	superBLoque.TamanioDelInodo = sizeInodo
 	superBLoque.TamanioDelBloque = sizeBloque
 
-	superBLoque.PrimerInodoLibre = 1
-	superBLoque.PrimerBloqueLibre = 1
+	superBLoque.PrimerInodoLibre = 2
+	superBLoque.PrimerBloqueLibre = 14
 
 	superBLoque.StartBMdeInodos = p.PartStart + sizeSP + int64(N)*sizeJour
 	superBLoque.StartBMdeBloques = p.PartStart + sizeSP + int64(N)*sizeJour + int64(N)
@@ -366,13 +366,13 @@ func darFormatoInicial(p Partition, ruta string) {
 	bloqueCarpeta.BContent[1].Apuntador = 0
 
 	//esta
-	//var nombre23 [12]byte
-	//nombreString23 := "users.txt"
-	//for i := 0; i < len(nombreString23); i++ {
-	//	nombre23[i] = nombreString23[i]
-	//}
-	//bloqueCarpeta.BContent[2].Name = nombre23
-	//bloqueCarpeta.BContent[2].Apuntador = 1
+	var nombre23 [12]byte
+	nombreString23 := "users.txt"
+	for i := 0; i < len(nombreString23); i++ {
+		nombre23[i] = nombreString23[i]
+	}
+	bloqueCarpeta.BContent[2].Name = nombre23
+	bloqueCarpeta.BContent[2].Apuntador = 1
 	//sssssssssssssssssss
 	//lo escribo
 	file.Seek(superBLoque.StartTablaDeBloques, 0)
@@ -384,6 +384,8 @@ func darFormatoInicial(p Partition, ruta string) {
 	}
 	leerBloqueDeCarpetas(ruta, superBLoque.StartTablaDeBloques)
 
+	EscribirByteBM(ruta, superBLoque.StartBMdeInodos+1, 1)
+	inodoUsersTxt(superBLoque, ruta)
 	//Buscar(ruta, superBLoque.StartTablaDeInodos, "usersZ.txt", superBLoque)
 }
 
@@ -640,4 +642,62 @@ func EscribirInodo(ruta string, seek int64, inodo Inodo) {
 		}
 	}
 
+}
+
+func inodoUsersTxt(sp SuperBloque, ruta string) {
+	inodo := Inodo{}
+	inodo.IUid = 1
+	inodo.IGid = 1
+	inodo.ISize = int64(unsafe.Sizeof(inodo))
+
+	today := time.Now()
+	var fecha [16]byte
+	for i := 0; i < 16; i++ {
+		fecha[i] = today.String()[i]
+	}
+	inodo.IAtime = fecha //fecha en que se leyo sin modificarlo
+	inodo.ICtime = fecha //fecha creacion
+	inodo.IMtime = fecha //fecha modificacion
+
+	for i := 0; i < len(inodo.IBlock); i++ {
+		inodo.IBlock[i] = -1
+	}
+
+	inodo.IType[0] = 1 //indico el tipo. 1 archivo 0 carpeta
+
+	for i := 0; i < len(inodo.IPerm); i++ {
+		inodo.IPerm[i] = 7
+	}
+	seek := calcularPosicionDelInodoEnElArchivo(1, sp)
+	EscribirInodo(ruta, seek, inodo)
+
+	def := "1,G,root\n1,U,root,root,123\n"
+	preg := "?"
+	ct := 0
+	for i := 1; i <= 13; i++ {
+		inodo.IBlock[ct] = int64(i)
+		blArch := BloqueDeArchivos{}
+
+		if i == 1 {
+			for j := 0; j < len(blArch.Contenido); j++ {
+				if j < len(def) {
+					blArch.Contenido[j] = def[j]
+				} else {
+					blArch.Contenido[j] = preg[0]
+				}
+			}
+			seekP := calcularPosicionDeBloqueEnElArchivo(int64(i), sp)
+			EscribirBloqueArchivo(ruta, seekP, blArch)
+			EscribirByteBM(ruta, sp.StartBMdeBloques+int64(i), 3)
+		} else {
+			for j := 0; j < len(blArch.Contenido); j++ {
+				blArch.Contenido[j] = preg[0]
+			}
+			seekP := calcularPosicionDeBloqueEnElArchivo(int64(i), sp)
+			EscribirBloqueArchivo(ruta, seekP, blArch)
+			EscribirByteBM(ruta, sp.StartBMdeBloques+int64(i), 3)
+		}
+		ct++
+	}
+	EscribirInodo(ruta, seek, inodo)
 }

@@ -12,7 +12,7 @@ import (
 //EjecutarMKFILE ejecuta el comando mkdir (crear carpetas)
 func EjecutarMKFILE(parametros []string, descripciones []string) {
 	fmt.Println("\n\n\n\n === EJECUTANDO COMANDO MK FILE === ")
-	var id, ruta, size string
+	var ruta, size string
 	var p, hayError bool
 
 	for i := 0; i < len(parametros); i++ {
@@ -20,10 +20,6 @@ func EjecutarMKFILE(parametros []string, descripciones []string) {
 		case "path":
 			{
 				ruta = descripciones[i]
-			}
-		case "id":
-			{
-				id = descripciones[i]
 			}
 		case "p":
 			{
@@ -48,46 +44,40 @@ func EjecutarMKFILE(parametros []string, descripciones []string) {
 
 		carpetas := strings.Split(ruta, "/")
 		//voy a revisar el ID
-		validarIDArch(carpetas, id, p, size)
+		validarIDArch(carpetas, p, size)
 
 	}
 }
 
-func validarIDArch(carpetas []string, id string, p bool, size string) {
+func validarIDArch(carpetas []string, p bool, size string) {
 
-	rutaDelDisco := ""
-	nombreDeLaParticion := ""
-	for i := 0; i < len(ParticionesMontadas); i++ {
-		if id == ParticionesMontadas[i].id {
-			rutaDelDisco = ParticionesMontadas[i].ruta
-			nombreDeLaParticion = ParticionesMontadas[i].nombre
-			break
-		}
-	}
-	if rutaDelDisco != "" && nombreDeLaParticion != "" {
+	//aca tenemos que hacer unos cambios por las variables globales
+	if LaRutaDelDisco != "" && NombreDeLaPartition != "" {
 		//aqui va a suceder la magia
-		mbr := LeerMBR(rutaDelDisco)
+		mbr := LeerMBR(LaRutaDelDisco)
 
 		//me retorna el numero de particion que se va a utilizar
-		numP := encontrarPartition(mbr, nombreDeLaParticion)
+		numP := encontrarPartition(mbr, NombreDeLaPartition)
 
 		if numP == 1 {
-			checar(mbr.MbrPartition1, rutaDelDisco, carpetas, id, p, size)
+			checar(mbr.MbrPartition1, LaRutaDelDisco, carpetas, p, size)
 		} else if numP == 2 {
-			checar(mbr.MbrPartition2, rutaDelDisco, carpetas, id, p, size)
+			checar(mbr.MbrPartition2, LaRutaDelDisco, carpetas, p, size)
 		} else if numP == 3 {
-			checar(mbr.MbrPartition3, rutaDelDisco, carpetas, id, p, size)
+			checar(mbr.MbrPartition3, LaRutaDelDisco, carpetas, p, size)
 		} else if numP == 4 {
-			checar(mbr.MbrPartition4, rutaDelDisco, carpetas, id, p, size)
+			checar(mbr.MbrPartition4, LaRutaDelDisco, carpetas, p, size)
 		} else {
 			fmt.Println("No se encontro la particion")
 		}
 
+	} else {
+		fmt.Println("No hay un usuario logueado")
 	}
 
 }
 
-func checar(partition Partition, ruta string, carpetas []string, id string, p bool, size string) {
+func checar(partition Partition, ruta string, carpetas []string, p bool, size string) {
 	fmt.Println("Ya estoy en checar")
 
 	//sp := LeerSuperBloque(ruta, partition.PartStart)
@@ -514,13 +504,14 @@ func buscarMenos1(ruta string, seekInodo int64, partition Partition) {
 
 				//escribo el bloque archivo
 				bloqueArchivo := BloqueDeArchivos{}
+				nums := "0123456789"
 				var ct byte = 0
 				for i := 0; i < len(bloqueArchivo.Contenido); i++ {
 					if ct <= 9 {
-						bloqueArchivo.Contenido[i] = ct
+						bloqueArchivo.Contenido[i] = nums[ct]
 					} else {
 						ct = 0
-						bloqueArchivo.Contenido[i] = ct
+						bloqueArchivo.Contenido[i] = nums[ct]
 					}
 					ct++
 				}
@@ -534,13 +525,13 @@ func buscarMenos1(ruta string, seekInodo int64, partition Partition) {
 				sp.PrimerBloqueLibre++
 				EscribirSuperBloque(ruta, partition, sp) //-------------------------------
 
-				cad := ""
+				/*cad := ""
 				for i := 0; i < len(bloqueArchivo.Contenido); i++ {
 					g := int(bloqueArchivo.Contenido[i])
 					cad += strconv.Itoa(g)
 				}
 				fmt.Println(cad)
-				fmt.Println("Se ha colocado el bloqueArchivo en un directooooooooooooooooooo")
+				fmt.Println("Se ha colocado el bloqueArchivo en un directooooooooooooooooooo")*/
 				return
 			}
 		} else if i == 13 {
@@ -558,13 +549,14 @@ func buscarMenos1(ruta string, seekInodo int64, partition Partition) {
 						//toca crear el bloqueArchivo
 						//escribo el bloque archivo
 						bloqueArchivo := BloqueDeArchivos{}
+						nums := "0123456789"
 						var ct byte = 0
 						for i := 0; i < len(bloqueArchivo.Contenido); i++ {
 							if ct <= 9 {
-								bloqueArchivo.Contenido[i] = ct
+								bloqueArchivo.Contenido[i] = nums[ct]
 							} else {
 								ct = 0
-								bloqueArchivo.Contenido[i] = ct
+								bloqueArchivo.Contenido[i] = nums[ct]
 							}
 							ct++
 						}
@@ -605,13 +597,14 @@ func buscarMenos1(ruta string, seekInodo int64, partition Partition) {
 				//creo el bloqueArchivo
 				//escribo el bloque archivo
 				bloqueArchivo := BloqueDeArchivos{}
+				nums := "0123456789"
 				var ct byte = 0
 				for i := 0; i < len(bloqueArchivo.Contenido); i++ {
 					if ct <= 9 {
-						bloqueArchivo.Contenido[i] = ct
+						bloqueArchivo.Contenido[i] = nums[ct]
 					} else {
 						ct = 0
-						bloqueArchivo.Contenido[i] = ct
+						bloqueArchivo.Contenido[i] = nums[ct]
 					}
 					ct++
 				}
@@ -647,13 +640,14 @@ func buscarMenos1(ruta string, seekInodo int64, partition Partition) {
 								//TOCA CREAR EL BLOQUE archivo
 								//escribo el bloque archivo
 								bloqueArchivo := BloqueDeArchivos{}
+								nums := "0123456789"
 								var ct byte = 0
 								for i := 0; i < len(bloqueArchivo.Contenido); i++ {
 									if ct <= 9 {
-										bloqueArchivo.Contenido[i] = ct
+										bloqueArchivo.Contenido[i] = nums[ct]
 									} else {
 										ct = 0
-										bloqueArchivo.Contenido[i] = ct
+										bloqueArchivo.Contenido[i] = nums[ct]
 									}
 									ct++
 								}
@@ -725,13 +719,14 @@ func buscarMenos1(ruta string, seekInodo int64, partition Partition) {
 				//creo el bloquearchivos
 				//escribo el bloque archivo
 				bloqueArchivo := BloqueDeArchivos{}
+				nums := "0123456789"
 				var ct byte = 0
 				for i := 0; i < len(bloqueArchivo.Contenido); i++ {
 					if ct <= 9 {
-						bloqueArchivo.Contenido[i] = ct
+						bloqueArchivo.Contenido[i] = nums[ct]
 					} else {
 						ct = 0
-						bloqueArchivo.Contenido[i] = ct
+						bloqueArchivo.Contenido[i] = nums[ct]
 					}
 					ct++
 				}

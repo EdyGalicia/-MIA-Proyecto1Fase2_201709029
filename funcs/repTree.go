@@ -226,8 +226,12 @@ func generarCuerpoRepBlockTree(p Partition, ruta string) string {
 
 				cad := ""
 				for i := 0; i < len(bloqueArchivo.Contenido); i++ {
-					g := int(bloqueArchivo.Contenido[i])
-					cad += strconv.Itoa(g)
+					//g := int(bloqueArchivo.Contenido[i])
+					if string(bloqueArchivo.Contenido[i]) == "\n" {
+						cad += "-"
+					} else {
+						cad += string(bloqueArchivo.Contenido[i])
+					}
 				}
 
 				Cuerpo += "<TR><TD>" + cad + "</TD></TR>\n"

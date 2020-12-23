@@ -111,6 +111,22 @@ func TipoDeInstruccion(entrada string) {
 		{
 			EjecutarMKFILE(param, descrip)
 		}
+	case "login":
+		{
+			EjecutarLogin(param, descrip)
+		}
+	case "logout":
+		{
+			EjecutarLogout()
+		}
+	case "mkgrp":
+		{
+			EjecutarMKGRP(param, descrip)
+		}
+	case "mkusr":
+		{
+			EjecutarMKUSR(param, descrip)
+		}
 	default:
 		{
 			fmt.Println("El comando es incorrecto.")
