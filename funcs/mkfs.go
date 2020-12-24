@@ -514,13 +514,13 @@ func leerBloqueDeArchivos(ruta string, seek int64) BloqueDeArchivos {
 		log.Fatalln(err)
 	}
 
-	cadena := ""
+	/*cadena := ""
 	for i := 0; i < len(blArchivo.Contenido); i++ {
 		if blArchivo.Contenido[i] != 0 {
 			cadena += string(blArchivo.Contenido[i])
 		}
 	}
-	fmt.Println(cadena)
+	fmt.Println(cadena)*/
 
 	return blArchivo
 }

@@ -157,7 +157,7 @@ func hacerLogin(p Partition, usuario string, password string, ruta string, nombr
 			}
 		}
 		if encontrado == false {
-			fmt.Println("El usuario no existe en el sistema de archivos")
+			fmt.Println("El usuario no invalido en el sistema de archivos")
 		}
 	} else {
 		fmt.Println("YA EXISTE UN USUARIO LOGUEADO")

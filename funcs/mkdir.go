@@ -71,27 +71,46 @@ func checarDireccion(partition Partition, ruta string, carpetas []string, p bool
 	//aqui tengo que hacer lo de id de las mierdas que estan montadas
 	//sp := LeerSuperBloque(ruta, partition.PartStart)
 
+	dir := make([]string, (len(carpetas) - 2), (len(carpetas) - 2))
+	c := 0
+	for i := 1; i < len(carpetas)-1; i++ {
+		dir[c] = carpetas[i]
+		c++
+	}
+	archivo := carpetas[len(carpetas)-1]
+	fmt.Println(dir)
+	letsgo := false
+	var aux int64 = 0
 	var pos int64 = 0
-	for i := 1; i < len(carpetas); i++ {
+	for i := 0; i < len(dir); i++ {
+
 		sp := LeerSuperBloque(ruta, partition.PartStart)
-		aux := pos
-		//fmt.Println("))))))))))))))))))))))))))))))))))))))))))))))))))))voy a ir a buscar" + carpetas[i] + " en")
-		//fmt.Println(pos)
-		pos = Buscar(ruta, pos, carpetas[i], sp)
-		if pos == -1 {
-			//llamo al metodo crear
+		aux = pos
+		pos = Buscar(ruta, pos, dir[i], sp)
+
+		if pos == -1 { //si no encuentra lo que buscamos
 			if p == true {
 				fmt.Println("No se encontro la carpeta, se creara")
-				buscarEspacioLibreEnBloqueCarpeta(ruta, aux, sp, carpetas[i], partition)
+				buscarEspacioLibreEnBloqueCarpeta(ruta, aux, sp, dir[i], partition)
 				sp = LeerSuperBloque(ruta, partition.PartStart)
 				pos = sp.PrimerInodoLibre - int64(1)
+				letsgo = true
 				//fmt.Println("))))))))))))))))))))))))))))))))))))))))))))))))))))")
 				//fmt.Println(pos)
 			} else {
-				fmt.Println("No se encontro el padre " + carpetas[i] + " y -p viene falso")
+				fmt.Println("No se encontro el padre " + dir[i] + " y -p viene falso")
+				letsgo = false
 				break
 			}
+		} else {
+			letsgo = true
 		}
+		aux = pos
+	}
+
+	if letsgo == true || len(dir) == 0 { //len(dir)==0 para -? /nuevaCarpeta
+		sp := LeerSuperBloque(ruta, partition.PartStart)
+		buscarEspacioLibreEnBloqueCarpeta(ruta, aux, sp, archivo, partition)
 	}
 }
 

@@ -127,6 +127,18 @@ func TipoDeInstruccion(entrada string) {
 		{
 			EjecutarMKUSR(param, descrip)
 		}
+	case "cat":
+		{
+			EjecutarCat(param, descrip)
+		}
+	case "ren":
+		{
+			EjecutarRen(param, descrip)
+		}
+	case "rem":
+		{
+			fmt.Println("No se termino comando rem")
+		}
 	default:
 		{
 			fmt.Println("El comando es incorrecto.")

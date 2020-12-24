@@ -122,7 +122,7 @@ func checar(partition Partition, ruta string, carpetas []string, p bool, size st
 		aux = pos
 	}
 
-	if letsgo == true || len(dir) == 0 {
+	if letsgo == true || len(dir) == 0 { //len(dir)==0 para -? /arc.txt
 		sp := LeerSuperBloque(ruta, partition.PartStart)
 		buscarEspacioLibreEnBloqueCarpetaArch(ruta, aux, sp, archivo, partition, size)
 	}
