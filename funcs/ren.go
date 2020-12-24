@@ -71,7 +71,12 @@ func checarRen(partition Partition, ruta string, path string, renombre string) {
 		sp := LeerSuperBloque(ruta, partition.PartStart)
 		//fmt.Println("))))))))))))))))))))))))))))))))))))))))))))))))))))voy a ir a buscar" + carpetas[i] + " en")
 		//fmt.Println(pos)
-		pos = BuscarRen(ruta, pos, carpetas[i], sp, renombre)
+		if i == len(carpetas)-1 {
+			pos = BuscarRen(ruta, pos, carpetas[i], sp, renombre, 1) //1 si lo debe cambiar
+		} else {
+			pos = BuscarRen(ruta, pos, carpetas[i], sp, renombre, 0) //0 si no lo cambia
+		}
+
 		if pos == -1 {
 			fmt.Println("No se ubico la ruta para hacer comando REN")
 			break
@@ -81,7 +86,7 @@ func checarRen(partition Partition, ruta string, path string, renombre string) {
 }
 
 //BuscarRen me va a buscar lo que le mande en origen y me retorna la posicion en el bitmap de inodos
-func BuscarRen(ruta string, posicionEstructura int64, origen string, sp SuperBloque, nuevoNombre string) int64 {
+func BuscarRen(ruta string, posicionEstructura int64, origen string, sp SuperBloque, nuevoNombre string, ban int) int64 {
 
 	//tomamos el inodo
 	posicionEstructuraArch := calcularPosicionDelInodoEnElArchivo(posicionEstructura, sp)
@@ -112,11 +117,13 @@ func BuscarRen(ruta string, posicionEstructura int64, origen string, sp SuperBlo
 								posInodo = int64(blCarpeta.BContent[j].Apuntador)
 								fmt.Println(posInodo)
 
-								for i := 0; i < len(blCarpeta.BContent[j].Name); i++ {
-									blCarpeta.BContent[j].Name[i] = 0
+								if ban == 1 {
+									for i := 0; i < len(blCarpeta.BContent[j].Name); i++ {
+										blCarpeta.BContent[j].Name[i] = 0
+									}
+									copy(blCarpeta.BContent[j].Name[:], nuevoNombre)
+									EscribirBloqueCarpeta(ruta, posSeek, blCarpeta)
 								}
-								copy(blCarpeta.BContent[j].Name[:], nuevoNombre)
-								EscribirBloqueCarpeta(ruta, posSeek, blCarpeta)
 
 								return posInodo
 							}
@@ -154,13 +161,15 @@ func BuscarRen(ruta string, posicionEstructura int64, origen string, sp SuperBlo
 										posInodo = int64(blCarpeta.BContent[j].Apuntador)
 										fmt.Println(posInodo)
 
-										//
-										for i := 0; i < len(blCarpeta.BContent[j].Name); i++ {
-											blCarpeta.BContent[j].Name[i] = 0
+										if ban == 1 {
+											//
+											for i := 0; i < len(blCarpeta.BContent[j].Name); i++ {
+												blCarpeta.BContent[j].Name[i] = 0
+											}
+											copy(blCarpeta.BContent[j].Name[:], nuevoNombre)
+											EscribirBloqueCarpeta(ruta, posSeek, blCarpeta)
+											//
 										}
-										copy(blCarpeta.BContent[j].Name[:], nuevoNombre)
-										EscribirBloqueCarpeta(ruta, posSeek, blCarpeta)
-										//
 
 										return posInodo
 									}
@@ -204,13 +213,15 @@ func BuscarRen(ruta string, posicionEstructura int64, origen string, sp SuperBlo
 												posInodo = int64(blCarpeta.BContent[j].Apuntador)
 												fmt.Println(posInodo)
 
-												//
-												for i := 0; i < len(blCarpeta.BContent[j].Name); i++ {
-													blCarpeta.BContent[j].Name[i] = 0
+												if ban == 1 {
+													//
+													for i := 0; i < len(blCarpeta.BContent[j].Name); i++ {
+														blCarpeta.BContent[j].Name[i] = 0
+													}
+													copy(blCarpeta.BContent[j].Name[:], nuevoNombre)
+													EscribirBloqueCarpeta(ruta, seekCarpeta, blCarpeta)
+													//
 												}
-												copy(blCarpeta.BContent[j].Name[:], nuevoNombre)
-												EscribirBloqueCarpeta(ruta, seekCarpeta, blCarpeta)
-												//
 
 												return posInodo
 											}
